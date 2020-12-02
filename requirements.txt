@@ -1,0 +1,8 @@
+numpy==1.15.0
+plotly==4.13.0
+pandas==1.0.3
+streamlit==0.69.2
+nvidia_ml_py3==7.352.0
+altair==4.1.0
+requests==2.22.0
+nvidia_smi==0.1.3
