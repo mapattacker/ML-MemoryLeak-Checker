@@ -1,16 +1,14 @@
 """streamlit server for demo site"""
 
 import json
-import os
 import time
+import os
 
-import altair as alt
-import numpy as np
-import nvidia_smi
 import pandas as pd
-import plotly.express as px
 import requests
 import streamlit as st
+import nvidia_smi
+
 
 
 def gpu_memory_tracker():
