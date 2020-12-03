@@ -1,4 +1,4 @@
-"""streamlit server for demo site"""
+"""streamlit server"""
 
 import json
 import time
@@ -32,13 +32,13 @@ def cpu_memory_tracker():
 
 
 def memory_df_record(type, cnt=0):
-  df = pd.DataFrame(columns=["%"])
-  if type == "gpu":
-    row = {"%": gpu_memory_tracker()}
-  elif type == "cpu":
-    row = {"%": cpu_memory_tracker()}
-  df = df.append(row, ignore_index=True)
-  return df
+    df = pd.DataFrame(columns=["%"])
+    if type == "gpu":
+        row = {"%": gpu_memory_tracker()}
+    elif type == "cpu":
+        row = {"%": cpu_memory_tracker()}
+    df = df.append(row, ignore_index=True)
+    return df
 
 
 def send2api(api, json_data):
@@ -66,27 +66,27 @@ def main():
     
     if api != "" and json_data is not None:
       
-      # plot charts
-      st.subheader("GPU Utilisation")
-      gpu = memory_df_record("gpu")
-      gpu_chart = st.line_chart(gpu, height=250)
-
-      st.subheader("RAM Utilisation")
-      cpu = memory_df_record("cpu")
-      cpu_chart = st.line_chart(cpu, height=250)
-
-      # read json request
-      json_data = json.loads(json_data.read())
-
-      # send request, reload chart
-      for cnt, i in enumerate(range(int(no_requests))):
+        # plot charts
+        st.subheader("GPU Utilisation")
         gpu = memory_df_record("gpu")
-        gpu_chart.add_rows(gpu)
+        gpu_chart = st.line_chart(gpu, height=250)
+
+        st.subheader("RAM Utilisation")
         cpu = memory_df_record("cpu")
-        cpu_chart.add_rows(cpu)
-        
-        send2api(api, json_data)
-        time.sleep(0.25)
+        cpu_chart = st.line_chart(cpu, height=250)
+
+        # read json request
+        json_data = json.loads(json_data.read())
+
+        # send request, reload chart
+        for cnt, i in enumerate(range(int(no_requests))):
+            gpu = memory_df_record("gpu")
+            gpu_chart.add_rows(gpu)
+            cpu = memory_df_record("cpu")
+            cpu_chart.add_rows(cpu)
+            
+            send2api(api, json_data)
+            time.sleep(0.25)
 
 
 if __name__ == "__main__":
