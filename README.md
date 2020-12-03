@@ -14,3 +14,11 @@ This streamlit app makes it easier to do all that.
 
  * Works in MacOS & Linux
  * `pip install -r requirements.txt`
+
+## How to Use
+
+ * Read the additional requirements in the UI
+ * Input parameters
+ * Memory leak is likely present if the utilisation keep increasing overtime.
+
+![](memory.png)
