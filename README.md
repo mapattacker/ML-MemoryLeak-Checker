@@ -17,6 +17,7 @@ This streamlit app makes it easier to do all that.
 
 ## How to Use
 
+ * `streamlit run app.py`: to launch the app
  * Read the additional requirements in the UI
  * Input parameters
  * Memory leak is likely present if the utilisation keep increasing overtime.
