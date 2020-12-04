@@ -1,14 +1,14 @@
 """streamlit server"""
 
 import json
-import time
 import os
+import time
 
+import altair as alt
+import nvidia_smi
 import pandas as pd
 import requests
 import streamlit as st
-import nvidia_smi
-import altair as alt
 
 
 def gpu_memory_tracker():
@@ -42,21 +42,12 @@ def memory_df_record(type, df, cnt):
     return df
 
 
-def send2api(api, json_data):
-    """Sends JSON request & recieve a JSON response"""
-    
-    response = requests.post(api, json=json_data)
-    json_response = response.content.decode('utf-8')
-    json_response = json.loads(json_response)
-    return json_response
-
-
 def altair_mem_chart(df, color):
     """configure altair chart"""
     c = alt.Chart(df, height=250
             ).mark_line(
             ).encode(
-                alt.Y('%', scale=alt.Scale(domain=(0, 100))),
+                alt.Y("%", scale=alt.Scale(domain=(0, 100))),
                 alt.X("Requests", axis=alt.Axis(tickMinStep=1)),
                 tooltip=["%", "Requests"]
             ).configure_line(
@@ -101,7 +92,7 @@ def main():
             chart = altair_mem_chart(cpu, "blue")
             cpu_chart_row.altair_chart(chart, use_container_width=True)
             
-            send2api(api, json_data)
+            requests.post(api, json=json_data)
             time.sleep(0.2)
 
 
