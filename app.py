@@ -53,7 +53,7 @@ def send2api(api, json_data):
 
 def altair_mem_chart(df, color):
     """configure altair chart"""
-    c = alt.Chart(df, height=200
+    c = alt.Chart(df, height=250
             ).mark_line(
             ).encode(
                 alt.Y('%', scale=alt.Scale(domain=(0, 100))),
