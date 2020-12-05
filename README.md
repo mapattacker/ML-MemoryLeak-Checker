@@ -12,7 +12,7 @@ This streamlit app makes it easier to do all that.
 
 ## Requirements
 
- * Works in MacOS & Linux
+ * Works in Linux
  * `pip install -r requirements.txt`
 
 ## How to Use
