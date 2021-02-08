@@ -1,3 +1,4 @@
+# python=3.7
 requests==2.23.0
 pandas==1.0.2
 nvidia_smi==0.1.3

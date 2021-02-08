@@ -31,15 +31,26 @@ def cpu_memory_tracker():
     return used_percent
 
 
-def memory_df_record(type, df, cnt):
-    """append new memory data row per request to dataframe"""
+def df_append_record(type, df, cnt, value):
+    """append new data row per request to dataframe"""
     if type == "gpu":
-        row = {"%": gpu_memory_tracker(), "Requests": cnt}
+        row = {"%": value, "Requests": cnt}
     elif type == "cpu":
-        row = {"%": cpu_memory_tracker(), "Requests": cnt}
+        row = {"%": value, "Requests": cnt}
+    elif type == "latency":
+        row = {"latency": value, "Requests": cnt}
     df = df.append(row, ignore_index=True)
     df["Requests"] = df["Requests"].astype("int")
     return df
+
+
+def latency_average(df, skip=5):
+    """calculate the average latency"""
+    if len(df) > 5:
+        avg = df["latency"].mean()
+        return round(avg, 5)
+    else:
+        return 0
 
 
 def send2api(api, json_data):
@@ -51,22 +62,32 @@ def send2api(api, json_data):
     return json_response
 
 
-def altair_mem_chart(df, color):
+def altair_chart_plot(df, color, latency_avg="None", X_label="Requests", Y_label="%", height=200):
     """configure altair chart"""
-    c = alt.Chart(df, height=250
-            ).mark_line(
-            ).encode(
-                alt.Y('%', scale=alt.Scale(domain=(0, 100))),
-                alt.X("Requests", axis=alt.Axis(tickMinStep=1)),
-                tooltip=["%", "Requests"]
-            ).configure_line(
-                color=color)
+    if Y_label == "%":
+        c = alt.Chart(df, height=height
+                ).mark_line(
+                ).encode(
+                    alt.Y(Y_label, scale=alt.Scale(domain=(0, 100))),
+                    alt.X(X_label, axis=alt.Axis(tickMinStep=1)),
+                    tooltip=[Y_label, X_label]
+                ).configure_line(
+                    color=color)
+    else:
+        c = alt.Chart(df, height=height, title="Avg: " + str(latency_avg)
+                ).mark_line(
+                ).encode(
+                    alt.Y(Y_label),
+                    alt.X(X_label, axis=alt.Axis(tickMinStep=1)),
+                    tooltip=[Y_label, X_label]
+                ).configure_line(
+                    color=color)
     return c
 
 
 def main():
     """design streamlit fronend"""
-    st.title("Memory Leak Test")
+    st.title("Memory Leak & Latency Test")
 
     st.subheader("Requirements")
     st.info("""   1. Your flask app & this streamlit app are in the same machine
@@ -87,22 +108,33 @@ def main():
         st.subheader("RAM Utilisation")
         cpu_chart_row = st.empty()
 
+        st.subheader("Latency")
+        latency_chart_row = st.empty()
+
         # read json request
         json_data = json.loads(json_data.read())
         cpu = gpu = pd.DataFrame(columns=["%", "Requests"])
+        latency = pd.DataFrame(columns=["latency", "Requests"])
 
         # send request, reload chart
         for cnt, i in enumerate(range(int(no_requests))):
-            gpu = memory_df_record("gpu", gpu, cnt)
-            chart = altair_mem_chart(gpu, "red")
+            gpu = df_append_record("gpu", gpu, cnt, gpu_memory_tracker())
+            chart = altair_chart_plot(gpu, "red")
             gpu_chart_row.altair_chart(chart, use_container_width=True)
 
-            cpu = memory_df_record("cpu", cpu, cnt)
-            chart = altair_mem_chart(cpu, "blue")
+            cpu = df_append_record("cpu", cpu, cnt, cpu_memory_tracker())
+            chart = altair_chart_plot(cpu, "blue")
             cpu_chart_row.altair_chart(chart, use_container_width=True)
             
+            start = time.time()
             send2api(api, json_data)
-            time.sleep(0.2)
+
+            duration = time.time()-start
+            latency = df_append_record("latency", latency, cnt, duration)
+            latency_avg = latency_average(latency) 
+            chart = altair_chart_plot(latency, "green", latency_avg=latency_avg, Y_label="latency")
+            latency_chart_row.altair_chart(chart, use_container_width=True)
+            st.write()
 
 
 if __name__ == "__main__":
